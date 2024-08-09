@@ -41,8 +41,7 @@ I don't exactly know what it wants, but here's what's worked for me:
 The very first research into this game's internals (after finding the code, of course) was gut flora (I don't know exactly why I did that first, but all the assets stuff
 was figured out by exploring how gut flora were loaded).
 
-A flora type is stored as a `GutFloraResource`, while an actual instance of a gut flora (in a dog's stomach) is stored as a `GutFloraBase`
-(which weirdly doesn't seem to be the base class for anything).
+Basic data about a flora type is stored as a `GutFloraResource`, while more complex behavior and data is stored in a `GutFloraBase`.
 
 `GutFloraResource`s are normally loaded from assets named `flora_[flora name]` or `Flora_[Capitalized Flora Name]` (they show up differently depending on whether Asset Bundle Extractor
 has loaded `globalgamemanagers` or not). The `GameObject`s attached to them are stored in `GutFlora_[Capitalized Flora Name]` (always capital). Both of these are in `resources.assets`.
