@@ -74,7 +74,7 @@ The `GutFloraBase` also contains a reference to a `RigidBody2D` called `rigidBod
 
 ## Items
 Data about items appears to be stored as an `InventoryItem` per item. Actual instances of items are just `GameObject`s. Some of these `GameObject`s have
-a component containing inventory items titled `spawnOnDestory` and `saveAsAlternativeItem`, but otherwise the `GameObject`s have no link to their `InventoryItem`.
+a component containing inventory items titled `spawnOnDestroy` and `saveAsAlternativeItem`, but otherwise the `GameObject`s have no link to their `InventoryItem`.
 
 Edibility is stored as a component of a `GameObject`, as an `Eatable`. This is a prime target for new gut flora, as they would have to be obtained from the
 `List<GutFloraResource>`s named `gutFloraTypes` and `boostedGutFloraTypes`. These lists are public and could possibly be modified at runtime to inject more flora
