@@ -79,7 +79,7 @@ namespace Wobbloader
                 return;
             }
             entryMethod.Invoke(null, new object[] { CreateStartDictionary(mod) });
-            Plugin.Logger.LogMessage($"Wobbloader mod started: {mod}");
+            Plugin.Logger.LogMessage($"Wobbloader mod started: {mod.Assembly.FullName}");
         }
 
         public Dictionary<string, object> CreateInitDictionary(string modPath)

@@ -3,7 +3,7 @@ using BepInEx.Logging;
 
 namespace Wobbloader;
 
-[BepInPlugin("kronosta.wobbloader", "Wobbloader", "0.0.1.0")]
+[BepInPlugin("kronosta.wobbloader", "Wobbloader", "0.0.2.0")]
 public class Plugin : BaseUnityPlugin
 {
     public static new ManualLogSource Logger;
