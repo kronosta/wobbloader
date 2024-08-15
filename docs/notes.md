@@ -107,3 +107,7 @@ Genes are really really complicated, and more research is needed. Here's what I'
 - To obtain the float values from a gene string, use `MathUtil.GetFloatFromGeneSequence`
 - Somewhere along this system, three different types of gene exist, known in code as Standard, Super, and Looped genes. I haven't figured out what these do yet, though it's apparent that Super genes only come into play when the passive mutation rate is set
   to medium or high in the game settings, at least when a dog has pupated (not sure about breeding or whether Super genes even exist then).
+
+# Dog Save Strings
+Doglab doesn't appear to be open source and is outdated, but the dev made a post [https://forums.tigsource.com/index.php?topic=53994.msg1397066#msg1397066](here) overviewing the save string format. It's actually an almost complete description of the
+compression, though it doesn't cover how to get the bits in the first place or how genes are encoded. The decompiled source is likely the only reference tool for that.
