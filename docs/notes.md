@@ -37,11 +37,12 @@ I don't exactly know what it wants, but here's what's worked for me:
 - Let it load for a few second
 
 # Run code every frame
-There doesn't appear to be a global method to patch for that, though you can come really close. `DogHome.Update` seems to run every frame as long as you're in game and not in a menu, though this
-is untested (hopefully this method doesn't inline as that would make it unpatchable. Nothing directly calls it since it's handled by Unity itself, so it might not inline if it has nothing to attach to?? If it inlines you might be able to attach to `DogHome.HandleInput` instead).
+There doesn't appear to be a global method to patch for that, though you can come really close. `DogHome.Update` seems to run every frame as long as you're in game and not in a menu, and you can patch in logic here (I was worried for a minute that
+this method would be inlined, making it impossible to patch, since it's really short, but it works fine). `TitleScreen.Update` and `TitleScreen.HandleInput` don't work with patching for some reason, so custom title screen update logic would have to use a
+different method. Some possibilities include creating a new GameObject with a separate update method or finding some random method in Unity that gets called every frame.
 There are other similar methods for the title screen and other menu screens. Also, the upside of this is that there Update methods for individual things, like `DoggyBrain.Update` or `GutFloraBase.Update`.
 
-Actually, you might be able to create an invisible `GameObject` with a `Component` attached to it to create your own global update method.
+You might be also able to create an invisible `GameObject` with a `Component` attached to it to create your own global update method.
 
 # Content
 ## Gut Flora
