@@ -87,3 +87,10 @@ a component containing inventory items titled `spawnOnDestroy` and `saveAsAltern
 Edibility is stored as a component of a `GameObject`, as an `Eatable`. This is a prime target for new gut flora, as they would have to be obtained from the
 `List<GutFloraResource>`s named `gutFloraTypes` and `boostedGutFloraTypes`. These lists are public and could possibly be modified at runtime to inject more flora
 into the game without adding any new foods.
+
+## Tails, Wings, Ears, Horns, and Noses
+These are all stored in the class `ModelLoader` with a master list and Dictionary for each part. The values are GameObjects, while the keys are a different enum type for each part. We can't add any more *named* values to enums,
+but enums are really just named integers and we can use integers that aren't specified in the enum. The part values specifically are 32-bit integers, which means we can have about 4 billion appearances **for each part**, so we'll probably never run out of those.
+In theory you should be able to add more appearances by adding the `GameObject`s to the list and Dictionary and giving them each an integer key; in practice this has not been tried yet.
+
+It might be a good idea to set up a string-to-integer mapping ID system in this modloader (or perhaps in a framework mod), so that IDs like these won't conflict so easily.
