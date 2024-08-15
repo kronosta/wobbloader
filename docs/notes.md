@@ -111,3 +111,5 @@ Genes are really really complicated, and more research is needed. Here's what I'
 # Dog Save Strings
 Doglab doesn't appear to be open source and is outdated, but the dev made a post [here](https://forums.tigsource.com/index.php?topic=53994.msg1397066#msg1397066) overviewing the save string format. It's actually an almost complete description of the
 compression, though it doesn't cover how to get the bits in the first place or how genes are encoded. The decompiled source is likely the only reference tool for that.
+
+I've also archived the post in [docs/save-post.txt](https://github.com/kronosta/wobbloader/blob/main/docs/save-post.txt)
