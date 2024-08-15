@@ -1,0 +1,140 @@
+I spent some time making it so you can import and export dogs! This is a feature I've wanted to support for a while now, and it's something that I've gotten more than a few questions about as well. It just seems like an obvious thing to include in a game like this.
+
+Before starting, I had to decide what form an exported dog should take. There's a lot of data to store, which limits me in a few respects, but there were still a few different options. The main two I was considering were images, and codes.
+
+I love the idea of dog data being stored inside of an image, which would most likely be a portrait of the dog itself, and it's a totally do-able way of going about things, but ultimately I decided against it. Doing things this way means that either I would have to implement my own file system browser and integrate it into the game (ew), or I'd have to force users to navigate through the game's directory and place their exported dogs into a very specific folder in order for them to be read. I don't really like either of these options. One takes up a lot of my time, and the other is a lot of work for the player.
+
+With codes, there's minimal extra feature work (I had to encode the data somehow anyways) and the player never has to dig through file directories to figure out how to import a new dog, so that's the way I'm doing things for now.
+
+When deciding on a paradigm for code generation, there were a few main goals. First is that I wanted the resulting code to be as short as possible. Second is that I didn't want players to be able to hand-edit a code without going through some effort. Ultimately I know people will be able to figure out how these codes work (people can de-compile unity projects pretty easily, and also I'm literally going to explain how it all works in this post), but I don't want it to be trivial to modify them. There's already one layer of abstraction in that you have to figure out what each part of a dog's gene actually does, but if you're going to edit these codes, I think it's fair that you have to go through at least a bit of extra effort to do so.
+
+I don't really have any experience in this sort of data manipulation, so it was a lot of fun to try and come up with a way of doing things. I'm sure there are better ways of going about all this, but so far my way works fine and I had a good time coming up with it. There are two main parts to the code generation: encoding and scrambling.
+
+There aren't a ton of parts to the data I'm exporting. There's the dog's genetics, the dog's name, the dog's age, and some facial information. A saved dog has more information attached to it than this, but a lot of it is sort of game-specific. There's no reason, for example, for me to included saved data about how soon an exported dog will need to poop.
+
+Of all this, I'm only actually encoding the dog's genetic information. The rest of the data is raw and just gets scrambled in the next step. The reason for this is that the gene is by far the biggest piece of data I'm exporting, and it's really the only thing that needs to be shrunk down. It's also much easier to save space encoding binary than it is when encoding arbitrary data.
+
+So, at the moment a dog's gene looks something like this:
+
+
+010010101000000000100000000000000000000000000001000000000100000100000000010000001000000010000011001000000110001111
+100110001110000001010001010000010001010100000000010100000100001000000000000000000010000000100010000000001000000000
+100001010000000000000000000000000000000000100000000000000000000000000100000000000100000000000000000100000000000011
+000000000000000000000000000000000000001000000000010000000001000000000010000001000000000110000000010000001000010001
+000000000000000000100001000010000001010000000000000100000000000000000100000000000000100100100000000000001000000010
+000011001000000000110000000001000000000000000000011000000000000010000100010000000000000000|00000|00000|01000|00000
+|00000|00000|00000|00000|00000|00000|00100|00000|10000|10010|00101|00101|10000|00000|10000|00000|00000|00000|00000
+0000000010|100100100000100
+
+
+That's a lot of data (824 characters), and it's most likely only going to get longer as the game goes on.
+
+The basic idea here is that I go through and encode chunks of this sequence to hex. I settled on hex as it's easy to convert to and from, and it leaves me with free characters to use for some other things that I'll talk about later.
+
+Dog genes are basically ternary (base 3). All you have to do is turn the separator symbols into twos. I experimented with doing that and then going from ternary to hex, but that actually ended up generating larger codes than my current strategy. Someone who's better than me at math could probably explain this better than I can, but as I understand it it's because a binary string with a length of, say, 10, will convert to a shorter hex string than a ternary string of the same length will. Ternary is already effectively more compressed than binary, so it's harder to shrink.
+
+
+BINARY: 1010001001 -> HEX: 289
+Length 10 -> Length 3
+
+TERNARY: 1010001001 -> HEX: 558A
+Length 10 -> Length 4
+
+
+So basically, if I can come up with a way to remove that extra bit, the data will compress further. And it turns out I CAN get rid of that extra bit. The cheapest way of doing this is to literally just leave it in, and that was my first way of going about things. The idea here is that I go through the gene in discrete chunks, converting each chunk to hex. I tested a few values with different gene inputs and the sweet spot for this value turned out to be 20, so that's what I'm using. Whenever I encounter a separator symbol, I just convert the chunk I've got, add the separator symbol back into the output, and then start a new chunk.
+
+That gives us this result.
+
+
+a95004tf80208f81010aC818F98E05cA08A8fA0840m80880b80214tl80000g80080j80060tm80100a80102hC0204b88000c84205m80002m920
+0080832hC0100kC001088000a|e|e|a8|e|e|e|e|e|e|e|b4|e|10|12|b5|b5|10|e|10|e|e|e|m2|4904
+
+
+Not bad! This takes our character count from 824 down to 199. That's 24% our original size. For completely random dogs the general number this gets me is around 30%. For dogs that are barely mutated, the number gets much lower!
+
+But, we can do better. By using essentially a lookup table, I can get rid of these separator symbols entirely, and take some surrounding bits with them.
+
+Essentially:
+
+
+|00 -> ;
+|01 -> :
+|10 -> [
+|11 -> ]
+|0  -> #
+|1  -> $
+...
+
+
+Doing that gets the gene looking like this!
+
+
+a95004tf80208f81010aC818F98E05cA08A8fA0840m80880b80214tl80000g80080j80060tm80100a80102hC0204b88000c84205m80002m920
+0080832hC0100kC001088000a:c:c;c:c:c:c:c:c:c:c:4:c<c<a2:5:5<c:c<c:c:c:c:k2<a904
+
+
+That brings us down from 199 to 192. Not incredible, but it's something. In this case it saved us 7 characters. In other cases it can save much more, up to 48 currently (max 2 per separator symbol). Why the inconsistency? Well, that brings me to another thing I'm doing with these codes.
+
+Astute readers might have noticed that the above codes are not entirely hex with separator substitutions. I have both upper and lower-case letters. So where did those lower-case letters come from? Well, I'm using those to represent consecutive zeros.
+
+Converting to and from binary has one big flaw for my usage. In binary land, the values "001" and "1" are equivalent. Leading zeros don't hold any value. In dog land, however, every bit is sacred and those leading zeros hold valuable information. This means that converting to and from binary chunks actually loses me a ton of data! To solve this problem, I watch for leading zeros. Once I've found the first '1' in my next sequence, I count up the number of zeros that came before it and I convert that number to a lower-case letter. 'a' represents one zero, 'b' represents 2, and so on. If the number of zeros is greater than can be represented, I just add more lower-case letters as needed.
+
+This could technically be optimized more without too much trouble, but I don't think the benefit would really be apparent. 26 -> 1 is a way better conversion than we get by converting to hex, so if we're hitting that limit we're already most likely getting a smaller-than-average generated code.
+
+So, back to the separator symbol replacement! The reason we end up saving fewer characters than it seems like we should is that in many cases we end up just optimizing out sets of preceding zeros. Those already fit into a single character, so pulling them out and putting them into a different character has no effect on the final code size. I tried out grabbing leading bits, as well as bits on either side of the separator, but the trailing bits method seemed to produce the smallest results, so that's what I'm sticking with.
+
+Now that I've got a smaller gene, I append the rest of the data I need to it and I pass that entire string along for scrambling.
+
+
+a95004tf80208f81010aC818F98E05cA08A8fA0840m80880b80214tl80000g80080j80060tm80100a80102hC0204b88000c84205m80002m920
+0080832hC0100kC001088000a:c:c;c:c:c:c:c:c:c:c:4:c<c<a2:5:5<c:c<c:c:c:c:k2<a904!0.4304495!Olive!2!1
+
+
+I came up with my own little scramble algorithm for this. The basic idea is that I go through the entire string bit by bit and swap indices based on the int value of the following character (wrapping around the string).
+
+For example, take the string "ABCD". For simplicity's sake, assume the following int values:
+
+
+A = 2
+B = 3
+C = 4
+D = 5
+
+
+Start at index 0(A).
+Look ahead one index to 1(B).
+The int value of B is 3. Looking 3 places ahead of index 0 and wrapping around the string, we end up at index 3(D).
+This results in us swapping indices 0 and 3, thus A and D.
+
+Now we have DBCA.
+
+Following this pattern:
+
+
+B[1] SWAP B[1] -> DBCA
+C[2] SWAP D[0] -> CBDA
+A[3] SWAP A[3] -> CBDA
+
+
+This is also trivial to unwind. Nearly all you have to do is just iterate through the string in reverse.
+
+
+CBDA
+A[3] SWAP A[3] -> CBDA
+D[2] SWAP C[0] -> DBCA
+B[1] SWAP B[1] -> DBCA
+D[0] SWAP A[2] -> ABCD
+
+
+The only caveat for this method is that your first index can never be allowed to swap with the index directly after it. If that swap occurs, then the necessary information required to unscramble will have disappeared. It's a simple fix though, you just skip the swap step in that instance and move onto the next index. (That said, it was decidedly NOT simple to figure out that little eccentricity.)
+
+But yeah, that's it! When you're done, you get this:
+
+
+0t02ahC800:0a2f:808h010<68C8g080084005c43988:1A1m8<0bm59:00acCl2008::013a:;cf0m:50108t8:acc9c00vc02:c::c485jc::412
+950c<5808c4:00Ac0048Ac!8i04!C80:!cl0!b2O0a002021tmk0800800898<c88F010E<00k0c082c2.0:84cc00421:f4e0
+
+
+Not impossible to edit, obviously, but definitely not trivial to do so by hand. Plus, at least for now, dog codes fit nicely inside of a single tweet! There are still opportunities to shrink this code even further, but I think shrinking the raw gene size somehow would prove easier than optimizing all this stuff for the time being. Something to play around with later if I need to!
+
+Oh, and if you were curious about the dog contained within the code I've been using, it's this one right here.
