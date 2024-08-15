@@ -1,7 +1,11 @@
 This is the world's first Wobbledogs mod loader! If you like Wobbledogs and are familiar with C# and .NET, you can make your own mods too!
 
 # How to install
-Go into the releases section of this GitHub page, and follow the instructions there.
+Download wobbloader-[version].zip, extract it, and copy it into the folder containing the `Wobbledogs.exe` file (on Windows, this is typically `C:/Program Files (x86)/Steam/steamapps/common/Wobbledogs/Wobbledogs_Windows_64/`). Then it should be installed, simply run Wobbledogs.exe. Then view `BepInEx/LogOutput.log` in any text editor. If everything works, the line 
+```
+[Info   :Wobbloader] Plugin Wobbloader is loaded! (Wobbloader)
+```
+should be in the log.
 
 # How to mod
 Use the `TemplateMod` (a Visual Studio project) in this GitHub repo to base your mod off of that one.
