@@ -24,7 +24,3 @@ namespaces are libraries used by the game. The main problem is that it's not imm
 all places where a specific method is called; these help, but sometimes code isn't called directly, and sometimes where it's called is really strange. I've made a few notes in `docs/notes` in this repo, please contribute if you find anything!
 
 Right now, none of the work is done for you, and there aren't any hooks. You need to patch in custom logic with Harmony.
-
-As for code that runs every frame (like a Unity `Update` method), there doesn't appear to be a global method to patch for that, though you can come really close. `DogHome.Update` seems to run every frame as long as you're in game and not in a menu, though this
-is untested (hopefully this method doesn't inline as that would make it unpatchable. Nothing directly calls it since it's handled by Unity itself, so it might not inline if it has nothing to attach to?? If it inlines you might be able to attach to `DogHome.HandleInput` instead).
-There are other similar methods for the title screen and other menu screens. Also, the upside of this is that there Update methods for individual things, like `DoggyBrain.Update` or `GutFloraBase.Update`.

@@ -36,6 +36,13 @@ I don't exactly know what it wants, but here's what's worked for me:
 - Close all further windows that it gives you
 - Let it load for a few second
 
+# Run code every frame
+There doesn't appear to be a global method to patch for that, though you can come really close. `DogHome.Update` seems to run every frame as long as you're in game and not in a menu, though this
+is untested (hopefully this method doesn't inline as that would make it unpatchable. Nothing directly calls it since it's handled by Unity itself, so it might not inline if it has nothing to attach to?? If it inlines you might be able to attach to `DogHome.HandleInput` instead).
+There are other similar methods for the title screen and other menu screens. Also, the upside of this is that there Update methods for individual things, like `DoggyBrain.Update` or `GutFloraBase.Update`.
+
+Actually, you might be able to create an invisible `GameObject` with a `Component` attached to it to create your own global update method.
+
 # Content
 ## Gut Flora
 The very first research into this game's internals (after finding the code, of course) was gut flora (I don't know exactly why I did that first, but all the assets stuff
