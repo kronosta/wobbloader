@@ -94,3 +94,16 @@ but enums are really just named integers and we can use integers that aren't spe
 In theory you should be able to add more appearances by adding the `GameObject`s to the list and Dictionary and giving them each an integer key; in practice this has not been tried yet.
 
 It might be a good idea to set up a string-to-integer mapping ID system in this modloader (or perhaps in a framework mod), so that IDs like these won't conflict so easily.
+
+# Genetics
+Genes are really really complicated, and more research is needed. Here's what I've figured out so far:
+
+- A `Gene` is an instance of a gene on a dog??
+- `GeneticProperty` is an int32-based enum containing the properties that can be modified by a gene.
+- `GeneticDomRecProperty` is somewhat similar to `GeneticProperty`, but with all-or-nothing dominant-recessive genes.
+- Genes are mainly controlled by a `MasterDogGene`, which is a component and somehow connected to a dog. Most gene logic happens here
+- Gene values are also stored in a string, and that string is mostly used rather than the `Gene` object
+- `DogLooks` (the component which determines the dog's appearance) reads from the **strings** to determine the visual traits.
+- To obtain the float values from a gene string, use `MathUtil.GetFloatFromGeneSequence`
+- Somewhere along this system, three different types of gene exist, known in code as Standard, Super, and Looped genes. I haven't figured out what these do yet, though it's apparent that Super genes only come into play when the passive mutation rate is set
+  to medium or high in the game settings, at least when a dog has pupated (not sure about breeding or whether Super genes even exist then).
